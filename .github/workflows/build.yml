@@ -1,0 +1,96 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  push:
+    tags:
+      - "*"
+    branches:
+      - 'main'
+      - 'master'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+    # if: contains(github.ref, 'tags')
+
+    strategy:
+      matrix:
+        gtk3-ver: ["3.20", "3.22", "3.24"]
+        arch: ["x86", "x64"]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: https://github.com/wingtk/gvsbuild#install-gvsbuild
+        run: |
+          mkdir C:\gtk-build\github
+          cd C:\gtk-build\github
+          git clone https://github.com/wingtk/gvsbuild.git
+
+      # make some patch work for building successfully
+      # https://docs.github.com/en/actions/learn-github-actions/workflow-commands-for-github-actions#environment-files
+      # https://github.com/actions/virtual-environments/issues/594#issuecomment-610370133
+      - name: update PATH, insert MSYS2 PATH before GIT PATH, cmd or powershell
+        run: |
+          # The path is reversed prepend to the env.PATH
+          $(
+            (echo "C:\msys64\mingw32\bin")
+            (echo "C:\msys64\mingw64\bin")
+            (echo "C:\msys64\usr\bin")
+            (echo "C:\hostedtoolcache\windows\Python\3.7.9\x64\Scripts")
+            (echo "C:\hostedtoolcache\windows\Python\3.7.9\x64")
+          ) | Out-File -FilePath $env:GITHUB_PATH -Append
+          # check GITHUB_PATH
+          echo "GITHUB_PATH: $env:GITHUB_PATH"
+          cat "$env:GITHUB_PATH"
+          echo "PATH: $env:Path"
+          # The build process will force use tools like mkdir, echo and so on in ""C:\program files\Git", why?
+          # Remove-Item -Recurse -Force -Path "C:\Program Files\Git\bin\bash.exe"
+          # Remove-Item -Recurse -Force -Path "C:\program files\Git\usr\bin"
+          Get-ChildItem -Path "C:\Program Files\Git\bin" -Exclude "git.exe" | ForEach-Object {Remove-Item $_ -Recurse -Force }
+          Get-ChildItem -Path "C:\program files\Git\usr\bin" -Exclude "git*" | ForEach-Object {Remove-Item $_ -Recurse -Force }
+        shell: pwsh
+
+      - name: check envs
+        run: |
+          echo "PATH: %PATH%"
+          echo "GITHUB_PATH: %GITHUB_PATH%"
+          where bash
+          where echo
+          where python
+        shell: cmd
+      - name: Run the build on ${{matrix.arch}} of gtk3-ver ${{matrix.gtk3-ver}}
+        continue-on-error: true
+        run: |
+          echo "PATH: $env:Path"
+          # more building details, see https://github.com/wingtk/gvsbuild#building-gtk
+          python build.py build --fast-build --keep-tools -p ${{matrix.arch}} --gtk3-ver ${{matrix.gtk3-ver}} --vs-ver 16 gtk3
+        working-directory: C:\gtk-build\github\gvsbuild
+      - name: Prepare release files on ${{matrix.arch}} of gtk3-ver ${{matrix.gtk3-ver}}
+        if: matrix.arch == 'x64'
+        run: |
+          7z a -tzip gtk3-windows-prebuild-${{matrix.gtk3-ver}}-${{matrix.arch}}.zip C:\gtk-build\gtk\x64\release\*
+          pwd && ls
+      - name: Prepare release files on ${{matrix.arch}} of gtk3-ver ${{matrix.gtk3-ver}}
+        if: matrix.arch == 'x86'
+        run: |
+          7z a -tzip gtk3-windows-prebuild-${{matrix.gtk3-ver}}-${{matrix.arch}}.zip C:\gtk-build\gtk\Win32\release\*
+          pwd && ls
+      - name: 'Publish binary to release'
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          file: gtk3-windows-prebuild-*
+          tags: true
+          draft: false
+          overwrite: true
