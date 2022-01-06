@@ -1,37 +1,21 @@
-## Welcome to GitHub Pages
+## gvsbuild-binaries
 
-You can use the [editor on GitHub](https://github.com/liudonghua123/gvsbuild-binaries/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This is an unofficial site for viewing and downloading GTK3 prebuild binaries for windows.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Download files
 
-### Markdown
+| VERSION     | x86         | x64         |
+| :---        |    :----:   |    :----:   |
+| 3.20        | [gtk3-windows-prebuild-3.20-x86.zip](https://github.com/liudonghua123/gvsbuild-binaries/releases/download/latest/gtk3-windows-prebuild-3.20-x86.zip)       | [gtk3-windows-prebuild-3.20-x64.zip](https://github.com/liudonghua123/gvsbuild-binaries/releases/download/latest/gtk3-windows-prebuild-3.20-x64.zip)   |
+| 3.22        | [gtk3-windows-prebuild-3.22-x86.zip](https://github.com/liudonghua123/gvsbuild-binaries/releases/download/latest/gtk3-windows-prebuild-3.22-x86.zip)       | [gtk3-windows-prebuild-3.22-x64.zip](https://github.com/liudonghua123/gvsbuild-binaries/releases/download/latest/gtk3-windows-prebuild-3.22-x64.zip)   |
+| 3.24        | [gtk3-windows-prebuild-3.24-x86.zip](https://github.com/liudonghua123/gvsbuild-binaries/releases/download/latest/gtk3-windows-prebuild-3.24-x86.zip)       | [gtk3-windows-prebuild-3.24-x64.zip](https://github.com/liudonghua123/gvsbuild-binaries/releases/download/latest/gtk3-windows-prebuild-3.24-x64.zip)   |
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Build details
 
-```markdown
-Syntax highlighted code block
+You can find the build script on https://github.com/liudonghua123/gvsbuild-binaries/blob/main/.github/workflows/build.yml.
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/liudonghua123/gvsbuild-binaries/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+The main build command is `python build.py build --fast-build --keep-tools -p (x86|x64) --gtk3-ver (3.20|3.22|3.24) --vs-ver 16 gtk3`.
 
 ### Support or Contact
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+If you have any bugs or suggestions, please file an issue on https://github.com/liudonghua123/gvsbuild-binaries/issues.
