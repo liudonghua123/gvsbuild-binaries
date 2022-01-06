@@ -56,8 +56,8 @@ jobs:
           # The build process will force use tools like mkdir, echo and so on in ""C:\program files\Git", why?
           # Remove-Item -Recurse -Force -Path "C:\Program Files\Git\bin\bash.exe"
           # Remove-Item -Recurse -Force -Path "C:\program files\Git\usr\bin"
-          Get-ChildItem -Path "C:\Program Files\Git\bin" -Exclude "git.exe" | ForEach-Object {Remove-Item $_ -Recurse -Force }
-          Get-ChildItem -Path "C:\program files\Git\usr\bin" -Exclude "git*" | ForEach-Object {Remove-Item $_ -Recurse -Force }
+          Remove-Item -Recurse -Force -Path "C:\Program Files\Git\bin\" -Exclude "git.exe"
+          Remove-Item -Recurse -Force -Path "C:\program files\Git\usr\bin" -Exclude "git*"
         shell: pwsh
 
       - name: check envs
