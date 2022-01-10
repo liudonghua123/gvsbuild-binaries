@@ -1,0 +1,36 @@
+--- "C:\\gtk-build\\build\\x64\\release\\gtk3-20\\gtk\\gtkcsscustomgadget.c"	2017-02-22 05:08:57.000000000 +0800
++++ "C:\\gtk-build\\build\\x64\\release\\gtk3-24\\gtk\\gtkcsscustomgadget.c"	2021-06-16 04:58:25.000000000 +0800
+@@ -121,14 +121,14 @@
+   GtkCssCustomGadgetPrivate *priv = gtk_css_custom_gadget_get_instance_private (GTK_CSS_CUSTOM_GADGET (gadget));
+ 
+   if (priv->preferred_size_func)
+-    return priv->preferred_size_func (gadget, orientation, for_size, 
+-                                      minimum, natural,
+-                                      minimum_baseline, natural_baseline,
+-                                      priv->data);
++    priv->preferred_size_func (gadget, orientation, for_size,
++                               minimum, natural,
++                               minimum_baseline, natural_baseline,
++                               priv->data);
+   else
+-    return GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->get_preferred_size (gadget, orientation, for_size, 
+-                                                                                          minimum, natural,
+-                                                                                          minimum_baseline, natural_baseline);
++    GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->get_preferred_size (gadget, orientation, for_size,
++                                                                                   minimum, natural,
++                                                                                   minimum_baseline, natural_baseline);
+ }
+ 
+ static void
+@@ -140,9 +140,9 @@
+   GtkCssCustomGadgetPrivate *priv = gtk_css_custom_gadget_get_instance_private (GTK_CSS_CUSTOM_GADGET (gadget));
+ 
+   if (priv->allocate_func)
+-    return priv->allocate_func (gadget, allocation, baseline, out_clip, priv->data);
++    priv->allocate_func (gadget, allocation, baseline, out_clip, priv->data);
+   else
+-    return GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->allocate (gadget, allocation, baseline, out_clip);
++    GTK_CSS_GADGET_CLASS (gtk_css_custom_gadget_parent_class)->allocate (gadget, allocation, baseline, out_clip);
+ }
+ 
+ static gboolean
