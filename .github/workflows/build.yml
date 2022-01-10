@@ -25,8 +25,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gtk3-ver: ["3.20", "3.22", "3.24"]
-        arch: ["x86", "x64"]
+        gtk3-ver: ['3.20', '3.22', '3.24']
+        arch: [x86, x64]
+        include:
+          - gtk3-ver: '3.20'
+            arch: x86
+            gtkcsscustomgadget: C:\gtk-build\build\Win32\release\gtk3-20\gtk\gtkcsscustomgadget.c
+          - gtk3-ver: '3.20'
+            arch: x64
+            gtkcsscustomgadget: C:\gtk-build\build\x64\release\gtk3-20\gtk\gtkcsscustomgadget.c
+          - gtk3-ver: '3.22'
+            arch: x86
+            gtkcsscustomgadget: C:\gtk-build\build\Win32\release\gtk3-22\gtk\gtkcsscustomgadget.c
+          - gtk3-ver: '3.22'
+            arch: x64
+            gtkcsscustomgadget: C:\gtk-build\build\x64\release\gtk3-22\gtk\gtkcsscustomgadget.c
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -36,18 +49,6 @@ jobs:
           mkdir C:\gtk-build\github
           cd C:\gtk-build\github
           git clone https://github.com/wingtk/gvsbuild.git
-      - name: do some patch for building 3.20 and 3.22
-        run: |
-          patch -u "C:\gtk-build\github\gvsbuild\gvsbuild\projects.py" fix_hb.h_not_found.patch
-          patch -u "C:\gtk-build\build\x64\release\gtk3-20\gtk\gtkcsscustomgadget.c" fix_error_C4098.patch
-          patch -u "C:\gtk-build\build\x64\release\gtk3-22\gtk\gtkcsscustomgadget.c" fix_error_C4098.patch
-          patch -u "C:\gtk-build\build\Win32\release\gtk3-20\gtk\gtkcsscustomgadget.c" fix_error_C4098.patch
-          patch -u "C:\gtk-build\build\Win32\release\gtk3-22\gtk\gtkcsscustomgadget.c" fix_error_C4098.patch
-          cat "C:\gtk-build\github\gvsbuild\gvsbuild\projects.py"
-          cat "C:\gtk-build\build\x64\release\gtk3-20\gtk\gtkcsscustomgadget.c"
-          cat "C:\gtk-build\build\x64\release\gtk3-22\gtk\gtkcsscustomgadget.c"
-          cat "C:\gtk-build\build\Win32\release\gtk3-20\gtk\gtkcsscustomgadget.c"
-          cat "C:\gtk-build\build\Win32\release\gtk3-22\gtk\gtkcsscustomgadget.c"
 
       # make some patch work for building successfully
       # https://docs.github.com/en/actions/learn-github-actions/workflow-commands-for-github-actions#environment-files
@@ -82,9 +83,23 @@ jobs:
           where python
         shell: cmd
       - name: Run the build on ${{matrix.arch}} of gtk3-ver ${{matrix.gtk3-ver}}
+        continue-on-error: true
         run: |
           echo "PATH: $env:Path"
           # more building details, see https://github.com/wingtk/gvsbuild#building-gtk
+          python build.py build --keep-tools -p ${{matrix.arch}} --gtk3-ver ${{matrix.gtk3-ver}} --vs-ver 16 gtk3
+        working-directory: C:\gtk-build\github\gvsbuild
+      - name: do some patch for building 3.20
+        if: matrix.gtk3-ver == '3.20' || matrix.gtk3-ver == '3.22'
+        run: |
+          patch -u "C:\gtk-build\github\gvsbuild\gvsbuild\projects.py" fix_hb.h_not_found.patch
+          cat "C:\gtk-build\github\gvsbuild\gvsbuild\projects.py"
+          patch -u ${{matrix.gtkcsscustomgadget}} fix_error_C4098.patch
+          echo ${{matrix.gtkcsscustomgadget}}
+          cat ${{matrix.gtkcsscustomgadget}}
+      - name: Run the build on ${{matrix.arch}} of gtk3-ver ${{matrix.gtk3-ver}}
+        if: matrix.gtk3-ver == '3.20' || matrix.gtk3-ver == '3.22'
+        run: |
           python build.py build --fast-build --keep-tools -p ${{matrix.arch}} --gtk3-ver ${{matrix.gtk3-ver}} --vs-ver 16 gtk3
         working-directory: C:\gtk-build\github\gvsbuild
       - name: Prepare release files on ${{matrix.arch}} of gtk3-ver ${{matrix.gtk3-ver}}
